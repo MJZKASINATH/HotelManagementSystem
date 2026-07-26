@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Management System - Multi-Role Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .view-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .view-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Custom Scrollbar for tables */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased h-screen flex overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-brand-900 text-white flex flex-col transition-all duration-300 z-20">
+        <div class="h-16 flex items-center px-6 border-b border-brand-600">
+            <i class="fa-solid fa-hotel text-xl mr-3 text-brand-500"></i>
+            <span class="text-lg font-bold tracking-wider">LuxeStay HMS</span>
+        </div>
+
+        <!-- Role Selector (Simulation Purpose) -->
+        <div class="p-4 bg-brand-600/30">
+            <p class="text-xs text-brand-100 uppercase font-semibold mb-2">Simulate Role</p>
+            <select id="roleSelector" class="w-full bg-brand-900 border border-brand-500 text-white text-sm rounded-lg focus:ring-brand-500 focus:border-brand-500 block p-2.5">
+                <option value="guest">Guest Portal</option>
+                <option value="receptionist">Receptionist Desk</option>
+                <option value="admin">Admin Dashboard</option>
+            </select>
+        </div>
+
+        <nav class="flex-1 px-4 py-4 space-y-2 overflow-y-auto" id="sidebarNav">
+            <!-- Navigation links will be injected here by JS based on role -->
+        </nav>
+
+        <div class="p-4 border-t border-brand-600">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center text-sm font-bold" id="userAvatar">G</div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium truncate" id="userName">John Doe</p>
+                    <p class="text-xs text-brand-100 truncate" id="userRoleDisplay">Guest</p>
+                </div>
+            </div>
+            <button class="mt-4 w-full flex items-center justify-center gap-2 text-sm text-brand-100 hover:text-white transition-colors">
+                <i class="fa-solid fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50 relative">
+        
+        <!-- Header -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 z-10 shadow-sm">
+            <h1 class="text-xl font-semibold text-slate-800" id="pageTitle">Dashboard</h1>
+            <div class="flex items-center gap-4">
+                <button class="text-slate-400 hover:text-slate-600 relative">
+                    <i class="fa-regular fa-bell text-xl"></i>
+                    <span class="absolute top-0 right-0 -mt-1 -mr-1 flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-8 relative">
+            
+            <!-- ================= GUEST VIEW ================= -->
+            <div id="view-guest" class="view-section active space-y-6">
+                
+                <!-- Welcome Banner -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">Welcome back, John!</h2>
+                        <p class="text-slate-500 mt-1">Ready for your next getaway? Search our available rooms.</p>
+                    </div>
+                    <button class="bg-brand-600 hover:bg-brand-500 text-white px-6 py-2.5 rounded-lg font-medium transition-colors shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-compass"></i> Explore Offers
+                    </button>
+                </div>
+
+                <!-- Room Search Form -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="text-lg font-semibold mb-4 border-b pb-2">Find a Room</h3>
+                    <form class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Check-in</label>
+                            <input type="date" class="w-full border-slate-300 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 border p-2.5 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Check-out</label>
+                            <input type="date" class="w-full border-slate-300 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 border p-2.5 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Guests</label>
+                            <select class="w-full border-slate-300 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 border p-2.5 text-sm">
+                                <option>1 Adult</option>
+                                <option selected>2 Adults</option>
+                                <option>2 Adults, 1 Child</option>
+                                <option>3+ Guests</option>
+                            </select>
+                        </div>
+                        <button type="button" class="w-full bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors">
+                            Search Availability
+                        </button>
+                    </form>
+                </div>
+
+                <!-- My Bookings -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 text-slate-800">Upcoming Bookings</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Booking Card -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col md:flex-row">
+                            <div class="w-full md:w-1/3 bg-slate-100 flex items-center justify-center min-h-[120px]">
+                                <i class="fa-solid fa-bed text-4xl text-slate-400"></i>
+                            </div>
+                            <div class="p-5 flex-1 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex justify-between items-start mb-2">
+                                        <h4 class="font-semibold text-lg">Deluxe Ocean View</h4>
+                                        <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded border border-green-200">Confirmed</span>
+                                    </div>
+                                    <p class="text-sm text-slate-500 mb-1"><i class="fa-regular fa-calendar mr-1"></i> Aug 12 - Aug 15, 2026</p>
+                                    <p class="text-sm text-slate-500"><i class="fa-solid fa-hashtag mr-1"></i> BK-9942</p>
+                                </div>
+                                <div class="mt-4 flex gap-2">
+                                    <button class="text-sm font-medium text-brand-600 hover:text-brand-800">View Details</button>
+                                    <span class="text-slate-300">|</span>
+                                    <button class="text-sm font-medium text-red-500 hover:text-red-700">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= RECEPTIONIST VIEW ================= -->
+            <div id="view-receptionist" class="view-section space-y-6">
+                
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 border-l-4 border-l-brand-500">
+                        <p class="text-sm font-medium text-slate-500">Arrivals Today</p>
+                        <p class="text-2xl font-bold text-slate-800 mt-1">12</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 border-l-4 border-l-orange-500">
+                        <p class="text-sm font-medium text-slate-500">Departures Today</p>
+                        <p class="text-2xl font-bold text-slate-800 mt-1">8</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 border-l-4 border-l-green-500">
+                        <p class="text-sm font-medium text-slate-500">Available Rooms</p>
+                        <p class="text-2xl font-bold text-slate-800 mt-1">45</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 border-l-4 border-l-purple-500">
+                        <p class="text-sm font-medium text-slate-500">In-House Guests</p>
+                        <p class="text-2xl font-bold text-slate-800 mt-1">104</p>
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <div class="flex gap-3">
+                    <button class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                        <i class="fa-solid fa-plus mr-1"></i> Walk-in Booking
+                    </button>
+                    <button class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                        <i class="fa-solid fa-search mr-1"></i> Find Guest
+                    </button>
+                </div>
+
+                <!-- Today's Operations Table -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                        <h3 class="font-semibold text-slate-800">Front Desk Queue</h3>
+                        <div class="flex gap-2">
+                            <select class="text-sm border-slate-300 rounded-md py-1 pl-2 pr-8 focus:ring-brand-500 focus:border-brand-500">
+                                <option>All Statuses</option>
+                                <option>Pending Check-in</option>
+                                <option>Pending Check-out</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-container overflow-x-auto w-full">
+                        <table class="w-full text-sm text-left text-slate-500">
+                            <thead class="text-xs text-slate-700 uppercase bg-slate-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 font-medium">Guest Name</th>
+                                    <th scope="col" class="px-6 py-3 font-medium">Booking Ref</th>
+                                    <th scope="col" class="px-6 py-3 font-medium">Room</th>
+                                    <th scope="col" class="px-6 py-3 font-medium">Type</th>
+                                    <th scope="col" class="px-6 py-3 font-medium">Status</th>
+                                    <th scope="col" class="px-6 py-3 font-medium text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="bg-white border-b hover:bg-slate-50 transition-colors">
+                                    <td class="px-6 py-4 font-medium text-slate-900">Sarah Connor</td>
+                                    <td class="px-6 py-4">BK-8831</td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-slate-400 italic">Unassigned</span>
+                                    </td>
+                                    <td class="px-6 py-4">Standard</td>
+                                    <td class="px-6 py-4">
+                                        <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded border border-yellow-200">Pending Check-in</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <button class="text-brand-600 hover:text-brand-900 font-medium bg-brand-50 hover:bg-brand-100 px-3 py-1 rounded transition-colors">Check-in</button>
+                                    </td>
+                                </tr>
+                                <tr class="bg-white border-b hover:bg-slate-50 transition-colors">
+                                    <td class="px-6 py-4 font-medium text-slate-900">Michael Scott</td>
+                                    <td class="px-6 py-4">BK-7720</td>
+                                    <td class="px-6 py-4 font-semibold">402</td>
+                                    <td class="px-6 py-4">Suite</td>
+                                    <td class="px-6 py-4">
+                                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded border border-blue-200">Pending Check-out</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <button class="text-orange-600 hover:text-orange-900 font-medium bg-orange-50 hover:bg-orange-100 px-3 py-1 rounded transition-colors">Check-out</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= ADMIN VIEW ================= -->
+            <div id="view-admin" class="view-section space-y-6">
+                
+                <!-- Financial Overview -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 text-slate-800">Financial Overview (Last 30 Days)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
+                            <div>
+                                <p class="text-sm text-slate-500 font-medium mb-1">Total Revenue</p>
+                                <h4 class="text-3xl font-bold text-slate-800">$124,500</h4>
+                            </div>
+                            <div class="mt-4 flex items-center text-sm text-green-600 font-medium">
+                                <i class="fa-solid fa-arrow-trend-up mr-1"></i> +8.2% vs last month
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
+                            <div>
+                                <p class="text-sm text-slate-500 font-medium mb-1">Avg. Occupancy Rate</p>
+                                <h4 class="text-3xl font-bold text-slate-800">78%</h4>
+                            </div>
+                            <div class="mt-4 w-full bg-slate-200 rounded-full h-2">
+                                <div class="bg-brand-500 h-2 rounded-full" style="width: 78%"></div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
+                            <div>
+                                <p class="text-sm text-slate-500 font-medium mb-1">New Bookings</p>
+                                <h4 class="text-3xl font-bold text-slate-800">342</h4>
+                            </div>
+                            <div class="mt-4 flex items-center text-sm text-red-500 font-medium">
+                                <i class="fa-solid fa-arrow-trend-down mr-1"></i> -2.1% vs last month
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Management Panels -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Staff Management -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                        <div class="flex justify-between items-center mb-4 border-b pb-2">
+                            <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-users-gear mr-2 text-slate-400"></i>Staff Management</h3>
+                            <button class="text-sm text-brand-600 font-medium hover:underline">Add Staff</button>
+                        </div>
+                        <ul class="space-y-3">
+                            <li class="flex justify-between items-center p-3 hover:bg-slate-50 rounded-lg transition-colors border border-transparent hover:border-slate-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">AS</div>
+                                    <div>
+                                        <p class="text-sm font-medium text-slate-800">Alice Smith</p>
+                                        <p class="text-xs text-slate-500">Receptionist</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="text-slate-400 hover:text-brand-600" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                                </div>
+                            </li>
+                            <li class="flex justify-between items-center p-3 hover:bg-slate-50 rounded-lg transition-colors border border-transparent hover:border-slate-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">RJ</div>
+                                    <div>
+                                        <p class="text-sm font-medium text-slate-800">Robert Jones</p>
+                                        <p class="text-xs text-slate-500">Housekeeping Mgr.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="text-slate-400 hover:text-brand-600" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Room Inventory -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                        <div class="flex justify-between items-center mb-4 border-b pb-2">
+                            <h3 class="font-semibold text-slate-800"><i class="fa-solid fa-cubes mr-2 text-slate-400"></i>Room Inventory</h3>
+                            <button class="text-sm text-brand-600 font-medium hover:underline">Manage Prices</button>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="font-medium">Standard Rooms (120)</span>
+                                    <span class="text-slate-500">85% Occupied</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-1.5">
+                                    <div class="bg-slate-600 h-1.5 rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="font-medium">Deluxe Suites (40)</span>
+                                    <span class="text-slate-500">60% Occupied</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-1.5">
+                                    <div class="bg-brand-500 h-1.5 rounded-full" style="width: 60%"></div>
+                                </div>
+                            </div>
+                             <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="font-medium">Presidential (5)</span>
+                                    <span class="text-slate-500">20% Occupied</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-1.5">
+                                    <div class="bg-amber-500 h-1.5 rounded-full" style="width: 20%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const roleSelector = document.getElementById('roleSelector');
+            const views = document.querySelectorAll('.view-section');
+            const pageTitle = document.getElementById('pageTitle');
+            const sidebarNav = document.getElementById('sidebarNav');
+            
+            // User Avatar Elements
+            const userNameEl = document.getElementById('userName');
+            const userRoleDisplayEl = document.getElementById('userRoleDisplay');
+            const userAvatarEl = document.getElementById('userAvatar');
+
+            // Define navigation menus per role
+            const navMenus = {
+                guest: [
+                    { icon: 'fa-house', text: 'My Dashboard', active: true },
+                    { icon: 'fa-calendar-check', text: 'My Bookings', active: false },
+                    { icon: 'fa-user', text: 'Profile Settings', active: false }
+                ],
+                receptionist: [
+                    { icon: 'fa-desktop', text: 'Front Desk', active: true },
+                    { icon: 'fa-calendar-days', text: 'Reservations', active: false },
+                    { icon: 'fa-broom', text: 'Housekeeping', active: false },
+                    { icon: 'fa-file-invoice-dollar', text: 'Billing', active: false }
+                ],
+                admin: [
+                    { icon: 'fa-chart-pie', text: 'Analytics', active: true },
+                    { icon: 'fa-users', text: 'Staff Directory', active: false },
+                    { icon: 'fa-bed', text: 'Room Management', active: false },
+                    { icon: 'fa-gears', text: 'System Settings', active: false }
+                ]
+            };
+
+            // Define mock user data per role
+            const mockUsers = {
+                guest: { name: 'John Doe', avatar: 'JD', bg: 'bg-brand-500' },
+                receptionist: { name: 'Alice Smith', avatar: 'AS', bg: 'bg-purple-500' },
+                admin: { name: 'Super Admin', avatar: 'SA', bg: 'bg-red-500' }
+            };
+
+            function renderSidebarNav(role) {
+                const menuItems = navMenus[role];
+                sidebarNav.innerHTML = ''; // Clear current
+                
+                menuItems.forEach(item => {
+                    const a = document.createElement('a');
+                    a.href = '#';
+                    a.className = `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                        item.active 
+                        ? 'bg-brand-600 text-white' 
+                        : 'text-brand-100 hover:bg-brand-800 hover:text-white'
+                    }`;
+                    a.innerHTML = `<i class="fa-solid ${item.icon} w-5 text-center"></i> ${item.text}`;
+                    sidebarNav.appendChild(a);
+                });
+            }
+
+            function switchRole(role) {
+                // Hide all views
+                views.forEach(view => view.classList.remove('active'));
+                
+                // Show selected view
+                const activeView = document.getElementById(`view-${role}`);
+                if (activeView) {
+                    activeView.classList.add('active');
+                }
+
+                // Update Titles and Nav
+                if (role === 'guest') {
+                    pageTitle.innerText = "Guest Portal";
+                } else if (role === 'receptionist') {
+                    pageTitle.innerText = "Front Desk Dashboard";
+                } else if (role === 'admin') {
+                    pageTitle.innerText = "Administrator Overview";
+                }
+
+                // Update User Info
+                const user = mockUsers[role];
+                userNameEl.innerText = user.name;
+                userRoleDisplayEl.innerText = role.charAt(0).toUpperCase() + role.slice(1);
+                userAvatarEl.innerText = user.avatar;
+                userAvatarEl.className = `w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${user.bg}`;
+
+                renderSidebarNav(role);
+            }
+
+            // Event Listener for the dropdown
+            roleSelector.addEventListener('change', (e) => {
+                switchRole(e.target.value);
+            });
+
+            // Initialize default view
+            switchRole('guest');
+        });
+    </script>
+</body>
+</html>
