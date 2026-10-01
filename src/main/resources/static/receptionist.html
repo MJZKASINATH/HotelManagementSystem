@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Receptionist Dashboard | Hotel Management</title>
+    <link rel="stylesheet" href="css/receptionist.css">
+</head>
+<body>
+    <header class="navbar">
+        <h2>Reception Desk</h2>
+        <span id="receptionistInfo">Logged in as: Admin</span>
+    </header>
+
+    <main class="dashboard-container">
+        <!-- Section 1: Offline Walk-In Booking -->
+        <section class="card">
+            <h3>Offline Guest Registration & Booking</h3>
+            <form id="offlineBookingForm">
+                <input type="text" id="guestName" placeholder="Guest Name" required>
+                <input type="text" id="idProof" placeholder="ID Proof (Passport/Aadhaar)" required>
+                <input type="tel" id="mobileNumber" placeholder="Mobile Number" required>
+                <input type="text" id="roomNumber" placeholder="Room Number" required>
+                <label>Check-In Date:</label>
+                <input type="date" id="checkInDate" required>
+                <label>Check-Out Date:</label>
+                <input type="date" id="checkOutDate" required>
+                <button type="submit">Complete Registration</button>
+            </form>
+            <div id="bookingResult" class="output-msg"></div>
+        </section>
+
+        <!-- Section 2: Check-In & Check-Out -->
+        <section class="card">
+            <h3>Check-In / Check-Out Guest</h3>
+            <div class="inline-form">
+                <input type="text" id="bookingNoInput" placeholder="Enter Booking Number">
+                <button onclick="performCheckIn()">Check-In</button>
+                <button onclick="performCheckOut()" class="btn-secondary">Check-Out</button>
+            </div>
+            <div id="actionResult" class="output-msg"></div>
+        </section>
+
+        <!-- Section 3: Available Rooms -->
+        <section class="card">
+            <h3>Available Rooms</h3>
+            <button onclick="loadAvailableRooms()">Refresh Rooms</button>
+            <ul id="roomsList" class="data-list"></ul>
+        </section>
+
+        <!-- Section 4: Incoming Service Requests -->
+        <section class="card full-width">
+            <h3>Pending Guest Service Requests</h3>
+            <button onclick="loadServiceRequests()">Refresh Requests</button>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Request ID</th>
+                        <th>Service ID</th>
+                        <th>Guest ID</th>
+                        <th>Assigned Admin</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="serviceRequestsTable"></tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="js/receptionist.js"></script>
+</body>
+</html>
